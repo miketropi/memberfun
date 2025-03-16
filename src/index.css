@@ -81,3 +81,113 @@ button:focus-visible {
 .dark button:hover {
   border-color: #818cf8;
 }
+
+.prose {
+  max-width: 65ch;
+  color: #374151;
+  line-height: 1.75;
+}
+
+.prose p {
+  margin: 1.25em 0;
+}
+
+.prose h1, 
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: #111827;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+.prose h1 {
+  font-size: 2.25em;
+}
+
+.prose h2 {
+  font-size: 1.875em;
+}
+
+.prose h3 {
+  font-size: 1.5em;
+}
+
+.prose h4 {
+  font-size: 1.25em;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1.25em 0;
+  padding-left: 1.625em;
+}
+
+.prose li {
+  margin: 0.5em 0;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+.prose blockquote {
+  border-left: 4px solid #e5e7eb;
+  margin: 1.25em 0;
+  padding-left: 1em;
+  font-style: italic;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 1.25em;
+  border-radius: 0.375em;
+  overflow-x: auto;
+}
+
+.dark .prose {
+  color: #d1d5db;
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  color: #f3f4f6;
+}
+
+.dark .prose a {
+  color: #60a5fa;
+}
+
+.dark .prose a:hover {
+  color: #93c5fd;
+}
+
+.dark .prose blockquote {
+  border-color: #374151;
+}
+
+.dark .prose code {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+.dark .prose pre {
+  background-color: #111827;
+}

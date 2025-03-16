@@ -165,5 +165,74 @@ const postsAPI = {
   },
 };
 
+// Seminars API
+const seminarsAPI = {
+  getUpcomingSeminars: async (params = {}) => {
+    try {
+      const response = await api.get('/memberfun/v1/seminars/upcoming', { params });
+      return response.data.seminars;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getSeminarsByHost: async (hostId, params = {}) => {
+    try {
+      const response = await api.get(`/memberfun/v1/seminars/by-host/${hostId}`, { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getCalendarData: async (params = {}) => {
+    try {
+      const response = await api.get('/memberfun/v1/seminars/calendar', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  exportToIcal: async (seminarId) => {
+    try {
+      const response = await api.get(`/memberfun/v1/seminars/${seminarId}/ical`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Additional methods for registration functionality
+  registerForSeminar: async (seminarId, userData = {}) => {
+    try {
+      const response = await api.post(`/memberfun/v1/seminars/${seminarId}/register`, userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  cancelRegistration: async (seminarId) => {
+    try {
+      const response = await api.delete(`/memberfun/v1/seminars/${seminarId}/register`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getRegisteredSeminars: async () => {
+    try {
+      const response = await api.get('/memberfun/v1/seminars/registered');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+};
+
 // Export all APIs
-export { api, authAPI, usersAPI, postsAPI }; 
+export { api, authAPI, usersAPI, postsAPI, seminarsAPI }; 

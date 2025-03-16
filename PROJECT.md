@@ -77,6 +77,24 @@ MemberFun is a web application for managing members, allowing users to register 
    - Document library with search and filter capabilities
    - Account settings with privacy controls
 
+6. **Member Seminar System**
+   - Custom post type for seminar events with comprehensive admin management interface
+   - Detailed seminar information including title, date, time, host, location, capacity, and featured image
+   - Document management system for seminar-related materials (presentations, handouts, etc.)
+   - Automatic email notifications when new seminars are published or updated
+   - Calendar integration with iCal export functionality for easy event scheduling
+   - Comprehensive REST API endpoints for accessing seminar data:
+     - `/seminars/upcoming` - Get upcoming seminars with pagination
+     - `/seminars/by-host/{host_id}` - Get seminars by specific host
+     - `/seminars/calendar` - Get calendar-formatted seminar data
+     - `/seminars/{id}/ical` - Export individual seminar to iCal format
+   - Frontend display components for upcoming and past seminars with filtering options
+   - Seminar registration system with capacity management and waitlist functionality
+   - Attendance tracking and reporting for seminar hosts and administrators
+   - Integration with video conferencing platforms for virtual seminars
+   - Responsive calendar view with FullCalendar integration
+   - Detailed seminar pages with host information and document downloads
+
 ## Development Phases
 
 1. **Planning & Design**
@@ -101,6 +119,10 @@ MemberFun is a web application for managing members, allowing users to register 
    - Media handling and optimization
    - Performance optimization and caching strategies
    - Security hardening and penetration testing
+   - Member Seminar custom post type implementation
+   - Seminar notification system and email templates
+   - Custom REST API endpoints for seminar data
+   - Calendar integration and iCal export functionality
 
 4. **Testing & Deployment**
    - Unit and integration testing with comprehensive coverage

@@ -33,12 +33,12 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              <Link
+              {/* <Link
                 to="/about"
                 className={`border-transparent ${theme === 'dark' ? 'text-gray-300 hover:border-blue-400 hover:text-blue-400' : 'text-gray-500 hover:border-blue-500 hover:text-blue-700'} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 About
-              </Link>
+              </Link> */}
               <Link
                 to="/contact"
                 className={`border-transparent ${theme === 'dark' ? 'text-gray-300 hover:border-blue-400 hover:text-blue-400' : 'text-gray-500 hover:border-blue-500 hover:text-blue-700'} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
