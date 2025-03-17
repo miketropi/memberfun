@@ -1,49 +1,74 @@
 import { useState, useEffect } from 'react';
 import { seminarsAPI } from '../../api/apiService';
-import { isPast, parseISO } from 'date-fns';
-import { 
-  SeminarTabs, 
-  SeminarList, 
-  SeminarDetails,
-  SeminarRegistrationForm
-} from './index';
+import SeminarFilters from './components/SeminarFilters';
+import SeminarPagination from './components/SeminarPagination';
+import SeminarHeader from './components/SeminarHeader';
+import SeminarContent from './components/SeminarContent';
 
 export default function CustomSeminarExample() {
-  const [upcomingSeminars, setUpcomingSeminars] = useState([]);
-  const [pastSeminars, setPastSeminars] = useState([]);
+  const [seminars, setSeminars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('upcoming');
   const [selectedSeminar, setSelectedSeminar] = useState(null);
   const [registeredSeminars, setRegisteredSeminars] = useState([]);
   const [registrationLoading, setRegistrationLoading] = useState(false);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    total: 0,
+    pages: 0,
+    page: 1,
+    limit: 20
+  });
+
+  // Filter state
+  const [filters, setFilters] = useState({
+    search: '',
+    host: '',
+    status: 'all' // all, upcoming, past
+  });
+
   useEffect(() => {
     fetchSeminars();
-  }, []);
+  }, [pagination.page, filters]);
 
   const fetchSeminars = async () => {
     try {
       setLoading(true);
       
-      // Fetch all seminars
-      const allSeminars = await seminarsAPI.getUpcomingSeminars({
-        limit: 50,
-        offset: 0
+      // Calculate offset based on current page
+      const offset = (pagination.page - 1) * pagination.limit;
+      
+      // Fetch seminars with pagination
+      let methodQuery = {
+        all: seminarsAPI.getSeminars,
+        upcoming: seminarsAPI.getUpcomingSeminars,
+      }
+      const response = await methodQuery[filters.status]({
+        limit: pagination.limit,
+        offset: offset,
+        search: filters.search,
+        host: filters.host
       });
       
-      // Split into upcoming and past
-      const upcoming = (allSeminars || []).filter(seminar => 
-        !isPast(parseISO(seminar.date))
-      );
+      // Update pagination info
+      if (response && 'total' in response) {
+        setPagination(prev => ({
+          ...prev,
+          total: response.total || 0,
+          pages: response.pages || 0
+        }));
+      }
+
+      // Filter seminars 
+      let filteredSeminars = response.seminars || [];
+      filteredSeminars = filteredSeminars.map(seminar => {
+        seminar.status = filters.status === 'past' ? isPastSeminar(seminar) : !isPastSeminar(seminar);
+        return seminar;
+      });
       
-      const past = (allSeminars || []).filter(seminar => 
-        isPast(parseISO(seminar.date))
-      );
-      
-      setUpcomingSeminars(upcoming);
-      setPastSeminars(past);
+      setSeminars(filteredSeminars);
       setLoading(false);
     } catch (err) {
       setError('Failed to load seminars. Please try again later.');
@@ -52,27 +77,28 @@ export default function CustomSeminarExample() {
     }
   };
 
+  const isPastSeminar = (seminar) => {
+    const dateTimeStr = `${seminar.date}T${seminar.time}`;
+    const seminarDateTime = new Date(dateTimeStr);
+    const now = new Date();
+    return seminarDateTime < now;
+  };
+
   const handleSeminarClick = (seminar) => {
     setSelectedSeminar(seminar);
     setShowRegistrationForm(false);
   };
 
   const handleRegister = (seminarId) => {
-    // Instead of directly registering, show the registration form
     setShowRegistrationForm(true);
   };
 
   const handleRegistrationComplete = (seminarId) => {
     if (seminarId) {
-      // Add to registered seminars
       setRegisteredSeminars([...registeredSeminars, seminarId]);
     }
-    
-    // Close the form and details
     setShowRegistrationForm(false);
     setSelectedSeminar(null);
-    
-    // Refresh the seminars list
     fetchSeminars();
   };
 
@@ -104,17 +130,26 @@ export default function CustomSeminarExample() {
     }
   };
 
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page when filters change
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
   const isRegistered = (seminarId) => {
     return registeredSeminars.includes(seminarId);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-64">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
@@ -127,72 +162,54 @@ export default function CustomSeminarExample() {
 
   return (
     <div className="bg-white dark:bg-gray-800">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Seminars</h1>
-        <SeminarTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
+      <SeminarHeader 
+        totalSeminars={pagination.total}
+        currentSeminars={seminars.length}
+        status={filters.status}
+      />
 
-      {showRegistrationForm && selectedSeminar ? (
-        <SeminarRegistrationForm
-          seminarId={selectedSeminar.id}
-          onRegistrationComplete={handleRegistrationComplete}
-          initialData={{
-            name: '',
-            email: '',
-            phone: '',
-            company: '',
-            dietary_requirements: '',
-            special_requests: ''
-          }}
-        />
-      ) : selectedSeminar ? (
-        <SeminarDetails
-          seminar={selectedSeminar}
-          onClose={() => setSelectedSeminar(null)}
-          isRegistered={isRegistered(selectedSeminar.id)}
-          onRegister={handleRegister}
-          onCancelRegistration={handleCancelRegistration}
-          onExportCalendar={handleExportCalendar}
-          registrationLoading={registrationLoading}
-        />
-      ) : (
-        <div>
-          {activeTab === 'upcoming' && (
-            <>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Upcoming Seminars</h2>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Showing {upcomingSeminars.length} upcoming seminars
-                </div>
-              </div>
-              <SeminarList
-                seminars={upcomingSeminars}
-                isRegisteredFn={isRegistered}
-                onSeminarClick={handleSeminarClick}
-                emptyMessage="No upcoming seminars available."
-              />
-            </>
-          )}
+      <SeminarFilters 
+        filters={filters}
+        onFilterChange={handleFilterChange}
+      />
 
-          {activeTab === 'past' && (
-            <>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Past Seminars</h2>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Showing {pastSeminars.length} past seminars
-                </div>
+      {
+        (() => {
+          if(loading) {
+            return (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
               </div>
-              <SeminarList
-                seminars={pastSeminars}
-                isRegisteredFn={isRegistered}
-                onSeminarClick={handleSeminarClick}
-                isPast={true}
-                emptyMessage="No past seminars available."
-              />
-            </>
-          )}
-        </div>
-      )}
+            );
+          } else {
+            return (
+              <>
+                <SeminarContent
+                  showRegistrationForm={showRegistrationForm}
+                  selectedSeminar={selectedSeminar}
+                  seminars={seminars}
+                  filters={filters}
+                  isRegistered={isRegistered}
+                  onSeminarClick={handleSeminarClick}
+                  onRegister={handleRegister}
+                  onCancelRegistration={handleCancelRegistration}
+                  onExportCalendar={handleExportCalendar}
+                  registrationLoading={registrationLoading}
+                  onRegistrationComplete={handleRegistrationComplete}
+                  onCloseDetails={() => setSelectedSeminar(null)}
+                />
+
+                <SeminarPagination
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                />
+              </>
+            )
+          }
+        })()
+      }
+
+      
     </div>
   );
 } 

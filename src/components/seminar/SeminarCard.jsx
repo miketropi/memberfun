@@ -41,16 +41,17 @@ export default function SeminarCard({ seminar, isRegistered, onClick, isPast = f
           <span>{seminar.host?.name || 'Unknown'}</span>
         </div>
       </td>
-      {!isPast && (
-        <td className="px-6 py-4 whitespace-nowrap">
-          {isRegistered && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Registered
-            </span>
-          )}
-        </td>
-      )}
+      <td className="px-6 py-4 whitespace-nowrap">
+        { seminar.status ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+            Upcoming
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+            Past
+          </span>
+        )}
+      </td>
     </tr>
   );
 } 

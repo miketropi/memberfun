@@ -5,4 +5,5 @@ export { default as SeminarDetails } from './SeminarDetails';
 export { default as SeminarTabs } from './SeminarTabs';
 export { default as SeminarRegistrationButton } from './SeminarRegistrationButton';
 export { default as SeminarRegistrationForm } from './SeminarRegistrationForm';
-export { default as CustomSeminarExample } from './CustomSeminarExample'; 
+export { default as CustomSeminarExample } from './CustomSeminarExample';
+export { default as SeminarComments } from './SeminarComments'; 

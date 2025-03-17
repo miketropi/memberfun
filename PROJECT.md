@@ -94,6 +94,29 @@ MemberFun is a web application for managing members, allowing users to register 
    - Integration with video conferencing platforms for virtual seminars
    - Responsive calendar view with FullCalendar integration
    - Detailed seminar pages with host information and document downloads
+   - Seminar-specific commenting system:
+     - Comments section for each seminar detail page
+     - Ability for attendees to leave feedback and questions
+     - Host responses and Q&A functionality
+     - Comment moderation for seminar hosts
+     - Email notifications for new comments
+     - Comment analytics for seminar hosts
+     - Rating system for seminar quality
+     - Comment filtering by date and type
+     - Export comments for seminar reports
+
+7. **Comments System**
+   - RESTful API endpoints for comment management:
+     - `/comments` - Get comments with filtering options (post_id, page, per_page, orderby, order, search, status)
+     - `/comments` (POST) - Create new comments
+     - `/comments/{id}` (PUT) - Update existing comments
+     - `/comments/{id}` (DELETE) - Delete comments
+   - Comment moderation and approval system
+   - Nested comments support with parent-child relationships
+   - Real-time comment updates
+   - Comment notifications for post authors
+   - Comment analytics and reporting
+   - Spam protection and content filtering
 
 ## Development Phases
 

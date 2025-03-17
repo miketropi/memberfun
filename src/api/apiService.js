@@ -167,10 +167,19 @@ const postsAPI = {
 
 // Seminars API
 const seminarsAPI = {
+  getSeminars: async (params = {}) => {
+    try {
+      const response = await api.get('/memberfun/v1/seminars', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getUpcomingSeminars: async (params = {}) => {
     try {
       const response = await api.get('/memberfun/v1/seminars/upcoming', { params });
-      return response.data.seminars;
+      return response.data;
     } catch (error) {
       throw error;
     }
@@ -234,5 +243,50 @@ const seminarsAPI = {
   },
 };
 
+// Comments API
+const commentsAPI = {
+  // Get comments with filtering options
+  getComments: async (params = {}) => {
+    try {
+      const response = await api.get('/memberfun/v1/comments', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Create a new comment
+  createComment: async (commentData) => {
+    try {
+      const response = await api.post('/memberfun/v1/comments', commentData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update an existing comment
+  updateComment: async (commentId, content) => {
+    try {
+      const response = await api.put(`/memberfun/v1/comments/${commentId}`, {
+        content
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete a comment
+  deleteComment: async (commentId) => {
+    try {
+      await api.delete(`/memberfun/v1/comments/${commentId}`);
+      return true; // Returns true if deletion was successful (204 status)
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
 // Export all APIs
-export { api, authAPI, usersAPI, postsAPI, seminarsAPI }; 
+export { api, authAPI, usersAPI, postsAPI, seminarsAPI, commentsAPI }; 
