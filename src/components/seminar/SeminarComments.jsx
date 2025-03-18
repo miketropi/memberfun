@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { commentsAPI } from '../../api/apiService';
-import { Star, Filter, Download, MessageSquare, ThumbsUp, Flag } from 'lucide-react';
+import { Star, Filter, Download, MessageSquare, ThumbsUp, Flag, Edit } from 'lucide-react';
 import Gavatar from '../Gavatar';
+import useUserStore from '../../store/userStore';
+
 export default function SeminarComments({ seminarId, isHost = false }) {
+  const { userData } = useUserStore();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editCommentId, setEditCommentId] = useState(null);
   const [filters, setFilters] = useState({
     date: 'all',
     type: 'all',
     rating: 'all'
   });
   const [showFilters, setShowFilters] = useState(false);
+  const commentFormRef = useRef(null);
 
   useEffect(() => {
     fetchComments();
@@ -42,11 +47,16 @@ export default function SeminarComments({ seminarId, isHost = false }) {
 
     try {
       setSubmitting(true);
-      await commentsAPI.createComment({
-        post_id: seminarId,
-        content: newComment
-      });
+      if (editCommentId) {
+        await commentsAPI.updateComment(editCommentId, newComment);
+      } else {
+        await commentsAPI.createComment({
+          post_id: seminarId,
+          content: newComment
+        });
+      }
       setNewComment('');
+      setEditCommentId(null);
       fetchComments();
     } catch (err) {
       setError('Failed to post comment. Please try again later.');
@@ -71,13 +81,13 @@ export default function SeminarComments({ seminarId, isHost = false }) {
     console.log('Exporting comments...');
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-32">
+  //       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg border  p-6">
@@ -86,7 +96,7 @@ export default function SeminarComments({ seminarId, isHost = false }) {
           <MessageSquare className="h-5 w-5 mr-2 text-blue-500" />
           Comments
         </h3>
-        <div className="flex items-center space-x-4">
+        {/* <div className="flex items-center space-x-4">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -103,7 +113,7 @@ export default function SeminarComments({ seminarId, isHost = false }) {
               Export
             </button>
           )}
-        </div>
+        </div> */}
       </div>
 
       {showFilters && (
@@ -160,7 +170,7 @@ export default function SeminarComments({ seminarId, isHost = false }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmitComment} className="mb-6">
+      <form ref={commentFormRef} onSubmit={handleSubmitComment} className="mb-6">
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
@@ -169,12 +179,26 @@ export default function SeminarComments({ seminarId, isHost = false }) {
           rows="3"
         />
         <div className="mt-2 flex justify-end">
+          {
+            editCommentId ? (
+            <button
+              type="button"
+              onClick={() => {
+                setEditCommentId(null)
+                setNewComment('')
+              }}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 mr-2"
+            >
+              Cancel Edit
+            </button>
+            ) : ''
+          }
           <button
             type="submit"
             disabled={submitting || !newComment.trim()}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Posting...' : 'Post Comment'}
+            {submitting ? 'Posting...' : editCommentId ? 'Update Comment' : 'Post Comment'}
           </button>
         </div>
       </form>
@@ -185,60 +209,87 @@ export default function SeminarComments({ seminarId, isHost = false }) {
         </div>
       )}
 
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center">
-                {/* <img
-                  src={comment.author.avatar || 'https://via.placeholder.com/40'}
-                  alt={comment.author.name}
-                  className="h-8 w-8 rounded-full mr-3"
-                /> */}
-                <Gavatar email={comment.author.email} size={40} className="h-8 w-8 rounded-full mr-3" />
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {comment.author.name}
-                  </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(comment.date).toLocaleDateString()}
-                  </div>
-                </div>
+      {
+        (() => {
+          if (loading) {
+            return (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
               </div>
-              {isHost && (
-                <button
-                  onClick={() => handleDeleteComment(comment.id)}
-                  className="text-red-500 hover:text-red-600"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-            <div className="prose dark:prose-invert max-w-none mb-3">
-              {comment.content}
-            </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-              <button className="flex items-center hover:text-gray-700 dark:hover:text-gray-300">
-                <ThumbsUp className="h-4 w-4 mr-1" />
-                Like
-              </button>
-              <button className="flex items-center hover:text-gray-700 dark:hover:text-gray-300">
-                <Flag className="h-4 w-4 mr-1" />
-                Report
-              </button>
-              {comment.rating && (
-                <div className="flex items-center">
-                  <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                  {comment.rating}/5
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          } else {
+            return <>
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center">
+                        {/* <img
+                          src={comment.author.avatar || 'https://via.placeholder.com/40'}
+                          alt={comment.author.name}
+                          className="h-8 w-8 rounded-full mr-3"
+                        /> */}
+                        <Gavatar email={comment.author.email} size={40} className="h-8 w-8 rounded-full mr-3" />
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {comment.author.name}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {new Date(comment.date).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      {isHost && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                    <div className="prose dark:prose-invert max-w-none mb-3">
+                      {comment.content}
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                      {/* <button className="flex items-center hover:text-gray-700 dark:hover:text-gray-300">
+                        <ThumbsUp className="h-4 w-4 mr-1" />
+                        Like
+                      </button> */}
+                      <button disabled className="flex bg-white items-center text-gray-400 dark:text-gray-600 cursor-not-allowed">
+                        <Flag className="h-4 w-4 mr-1" />
+                        Report
+                      </button>
+                      {/* { JSON.stringify(comment.author.id) }
+                      { JSON.stringify(userData.id) } */}
+                      {parseInt(comment.author.id) === userData.id && (
+                        <button onClick={ (e) => {
+                          e.preventDefault();
+                          setNewComment(comment.content);
+                          setEditCommentId(comment.id);
+                          commentFormRef.current.scrollIntoView({ behavior: 'smooth' });
+                        } } className="flex bg-white items-center hover:text-gray-700 dark:hover:text-gray-300">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </button>
+                      )}
+                      {/* {comment.rating && (
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          {comment.rating}/5
+                        </div>
+                      )} */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          }
+        })()
+      }
     </div>
   );
 } 

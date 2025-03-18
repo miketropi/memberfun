@@ -241,6 +241,15 @@ const seminarsAPI = {
       throw error;
     }
   },
+
+  addRating: async (seminarId, ratingData) => {
+    try {
+      const response = await api.post(`/memberfun/v1/seminars/${seminarId}/rating`, ratingData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 // Comments API

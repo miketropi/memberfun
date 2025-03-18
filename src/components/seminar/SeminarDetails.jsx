@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import SeminarRegistrationButton from './SeminarRegistrationButton';
 import SeminarComments from './SeminarComments';
-
+import SeminarAddRating from './components/SeminarAddRating';
+import SeminarRatingTable from './components/SeminarRatingTable';
 export default function SeminarDetails({ 
   seminar, 
   onClose, 
@@ -68,6 +69,12 @@ export default function SeminarDetails({
                 </div>
               )}
             </div>
+
+            {/* {
+              JSON.stringify(seminar.ratings)
+            } */}
+            <SeminarRatingTable ratings={seminar.ratings} />
+            <SeminarAddRating seminar={seminar} />
           </div>
           
           <div className="col-span-1 md:col-span-4">
