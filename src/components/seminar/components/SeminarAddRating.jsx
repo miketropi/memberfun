@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, Mic2, ClipboardCheck, Lightbulb } from 'lucide-react';
+import { Star, Mic2, ClipboardCheck, Lightbulb, AlertTriangle } from 'lucide-react';
 import Popover from '../../Popover';
 import { seminarsAPI } from '../../../api/apiService';
+import Toast from '../../Toast';
+
 export default function SeminarAddRating({ seminar, onRatingAdded }) {
+  const toastRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState({
-    skill: null,
-    quality: null,
-    usefulness: null
+    skill: 5,
+    quality: 5,
+    usefulness: 5
   });
 
   // Skill, quality, usefulness
@@ -95,11 +99,31 @@ export default function SeminarAddRating({ seminar, onRatingAdded }) {
   ]
 
   const handleSubmit = async () => {
+    setIsOpen(false);
     try {
       const response = await seminarsAPI.addRating(seminar.id, { ratingData: rating });
-      console.log(response);
-      onRatingAdded(response);
+      const { success, message } = response;
+
+      if (success) {
+        toastRef.current.show('Rating added successfully', {
+          type: 'success',
+          duration: 3000,
+          position: 'top-right'
+        });
+        onRatingAdded(response);
+      } else {
+        toastRef.current.show(message, {
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
+      }
     } catch (error) {
+      toastRef.current.show('Error adding rating', {
+        type: 'error',
+        duration: 3000,
+        position: 'top-right'
+      });
       console.error('Error adding rating:', error);
     }
   }
@@ -122,7 +146,6 @@ export default function SeminarAddRating({ seminar, onRatingAdded }) {
                 onChange={(e) => setRating({ ...rating, [method.name.toLowerCase()]: e.target.value })}
                 className="w-24 px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white transition-all duration-200 appearance-none cursor-pointer hover:border-blue-500 dark:hover:border-blue-400"
               >
-                <option value="">Rate</option>
                 {method.options.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.value}</option>
                 ))}
@@ -135,6 +158,11 @@ export default function SeminarAddRating({ seminar, onRatingAdded }) {
           
         </div>
       ))}
+
+      <p className="text-sm font-medium bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-200 border-2 border-yellow-200 dark:border-yellow-700/50 rounded-lg p-4 mb-6 flex items-center gap-2">
+        Submitted reviews cannot be altered. Ensure accuracy before clicking 'Submit'.
+      </p>
+
       <button 
         onClick={handleSubmit}
         className="w-full py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-lg shadow-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-gradient bg-[length:200%_200%]"
@@ -145,11 +173,14 @@ export default function SeminarAddRating({ seminar, onRatingAdded }) {
   )
 
   return <div>
-    <Popover width={450} placement="right" content={ ratingContent }>
+    
+    <Popover width={450} placement="right" content={ ratingContent } isOpen={isOpen} onOpenChange={setIsOpen}>
       <button className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 border border-transparent rounded-md shadow-sm hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all animate-gradient bg-[length:200%_200%] bg-left hover:bg-right duration-500">
         <Star className="h-5 w-5 mr-2" />
         Add Rating
       </button>
     </Popover>
+
+    <Toast ref={toastRef} />
   </div>
 }

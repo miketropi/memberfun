@@ -30,6 +30,8 @@ import { createPortal } from 'react-dom';
  * @param {Function} [onOpen] - Callback fired when popover opens
  * @param {Function} [onClose] - Callback fired when popover closes
  * @param {number|string} [width=180] - Width of the popover in pixels or CSS units
+ * @param {boolean} [isOpen] - Control popover open/closed state
+ * @param {Function} [onOpenChange] - Callback when open state changes
  */
 
 export default function Popover({ 
@@ -41,13 +43,21 @@ export default function Popover({
   className = '',
   onOpen,
   onClose,
-  width = 200
+  width = 200,
+  isOpen: controlledIsOpen,
+  onOpenChange
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
   const [popoverStyles, setPopoverStyles] = useState({});
   const triggerRef = useRef(null);
   const popoverRef = useRef(null);
   const timeoutRef = useRef(null);
+
+  const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
+  const setIsOpen = (nextOpen) => {
+    setUncontrolledIsOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  };
 
   useEffect(() => {
     if (!isOpen) return;

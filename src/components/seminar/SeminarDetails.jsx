@@ -25,6 +25,12 @@ export default function SeminarDetails({
 }) {
   if (!seminar) return null;
 
+  const handleRatingAdded = (response) => {
+    // console.log(response);
+
+  };
+
+
   return (
     <div className="space-y-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl sm:p-6 md:p-8 border border-gray-100 dark:border-gray-700">
@@ -74,7 +80,7 @@ export default function SeminarDetails({
               JSON.stringify(seminar.ratings)
             } */}
             <SeminarRatingTable ratings={seminar.ratings} />
-            <SeminarAddRating seminar={seminar} />
+            <SeminarAddRating seminar={seminar} onRatingAdded={handleRatingAdded} />
           </div>
           
           <div className="col-span-1 md:col-span-4">
