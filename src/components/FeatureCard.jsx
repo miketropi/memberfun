@@ -8,7 +8,7 @@ import React from 'react';
  * @param {string} textIconClass - The class for the text and icon (e.g. "text-indigo-600", "text-purple-600", "text-pink-600")
  * @param {string} bgIconClass - The class for the background of the icon (e.g. "bg-indigo-100", "bg-purple-100", "bg-pink-100")
  */
-const FeatureCard = ({ title, description, icon, color }) => {
+const FeatureCard = ({ title, description, icon, color }) => { 
   return (
     <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100">
       <div className={`h-2 bg-${color}-600 w-full absolute top-0`}></div>

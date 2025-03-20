@@ -167,6 +167,15 @@ const postsAPI = {
 
 // Seminars API
 const seminarsAPI = {
+  getSeminar: async (seminarId) => {
+    try {
+      const response = await api.get(`/memberfun/v1/seminars/${seminarId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getSeminars: async (params = {}) => {
     try {
       const response = await api.get('/memberfun/v1/seminars', { params });
@@ -245,6 +254,15 @@ const seminarsAPI = {
   addRating: async (seminarId, ratingData) => {
     try {
       const response = await api.post(`/memberfun/v1/seminars/${seminarId}/rating`, ratingData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getRatings: async (seminarId) => {
+    try {
+      const response = await api.get(`/memberfun/v1/seminars/${seminarId}/ratings`);
       return response.data;
     } catch (error) {
       throw error;

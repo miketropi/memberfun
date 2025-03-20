@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { format, parseISO, isFuture } from 'date-fns';
 import { 
   Calendar, 
@@ -13,6 +14,8 @@ import SeminarRegistrationButton from './SeminarRegistrationButton';
 import SeminarComments from './SeminarComments';
 import SeminarAddRating from './components/SeminarAddRating';
 import SeminarRatingTable from './components/SeminarRatingTable';
+import { seminarsAPI } from '../../api/apiService';
+
 export default function SeminarDetails({ 
   seminar, 
   onClose, 
@@ -25,9 +28,19 @@ export default function SeminarDetails({
 }) {
   if (!seminar) return null;
 
-  const handleRatingAdded = (response) => {
-    // console.log(response);
+  const [ratings, setRatings] = useState([]);
 
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const ratings = await seminarsAPI.getRatings(seminar.id);
+      setRatings(ratings);
+    };
+    fetchRatings();
+  }, [seminar.id]);
+
+  const handleRatingAdded = async (response) => {
+    const ratings = await seminarsAPI.getRatings(seminar.id);
+    setRatings(ratings);
   };
 
 
@@ -79,7 +92,7 @@ export default function SeminarDetails({
             {/* {
               JSON.stringify(seminar.ratings)
             } */}
-            <SeminarRatingTable ratings={seminar.ratings} />
+            <SeminarRatingTable ratings={ratings} />
             <SeminarAddRating seminar={seminar} onRatingAdded={handleRatingAdded} />
           </div>
           
